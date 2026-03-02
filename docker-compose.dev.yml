@@ -4,7 +4,7 @@ services:
       context: ./frontend/collaborative-text-editor
       target: dev
     ports:
-      - "8080:4200"
+      - "4200:4200"
     volumes:
       - ./frontend/collaborative-text-editor:/app     # Link files between host and container so angular reload works
       - /app/node_modules                             # make the container node_modules a volume so it's not overridden
