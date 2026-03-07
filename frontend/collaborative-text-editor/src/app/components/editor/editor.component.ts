@@ -13,6 +13,7 @@ import { EditorStoreService } from "../../services/EditorStore/editor-store.serv
 export class Editor implements OnInit {
     editorStoreService = inject(EditorStoreService);
     editorContent: string = '';
+    documentTitle: string = 'Document Title';
 
     ngOnInit(): void {
         this.editorStoreService.contentSubjectObservable.subscribe(value => {

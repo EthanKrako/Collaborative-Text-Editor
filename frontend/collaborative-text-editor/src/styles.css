@@ -1,1 +1,12 @@
-/* You can add global styles to this file, and also import other style files */
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+}
+
+#mainEditor .ql-toolbar, #mainEditor .ql-container {
+    border: 0;
+}
+
+#mainEditor .ql-container {
+    height: calc(100% - 50px);
+}

@@ -1,3 +1,18 @@
-h1 {
-    color: red;
+.documentTitle {
+    text-align: center;
+    font-size: clamp(40px, calc(25px + 2vw), 60px);
+}
+
+#mainEditor {
+    height: 100%;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+:host {
+    height: inherit;
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px 10px 20px;
 }
