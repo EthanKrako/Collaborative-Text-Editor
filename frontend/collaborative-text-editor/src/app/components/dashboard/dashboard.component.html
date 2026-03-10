@@ -1,5 +1,5 @@
 <!-- "| async" automatically subscribe the whole loop to documents$  -->
-@for (document in documents$ | async; track document.id) {      
+@for (document of documents$ | async; track document.id) {      
     <div class="documentCard">
         <div class="documentPreview"></div>
         <div class="documentTitle">{{document.title}}</div>
