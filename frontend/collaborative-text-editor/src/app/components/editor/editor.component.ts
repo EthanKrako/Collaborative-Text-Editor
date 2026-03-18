@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from "@angular/core";
 import { FormsModule, ValueChangeEvent } from "@angular/forms";
 import { QuillModule } from "ngx-quill";
-import { EditorStoreService } from "../../services/EditorStore/editor-store.service";
+import { DocumentStoreService } from "../../services/DocumentStore/document-store.service";
 
 @Component({
     selector: 'app-editor',
@@ -11,18 +11,24 @@ import { EditorStoreService } from "../../services/EditorStore/editor-store.serv
 })
 
 export class Editor implements OnInit {
-    editorStoreService = inject(EditorStoreService);
+    documentStoreService = inject(DocumentStoreService);
     editorContent: string = '';
-    documentTitle: string = 'Document Title';
+    documentTitle: string = 'Title';
+    documentId: string = ''
 
     ngOnInit(): void {
-        this.editorStoreService.contentSubjectObservable.subscribe(value => {
-            this.editorContent = value;
+        this.documentStoreService.activeDocument$.subscribe(doc => {
+            if (doc) {
+                this.editorContent = doc.content;
+                this.documentTitle = doc.title;
+                this.documentId = doc.id;
+            }
         })
     }
 
     onContentChanged(newContent: string) {
-        this.editorStoreService.setContent(newContent);
-        console.log('Content updated in store:', this.editorStoreService.getContent());
+        if (this.documentId) {
+            this.documentStoreService.updateContent(this.documentId, newContent);
+        }
     }
 }

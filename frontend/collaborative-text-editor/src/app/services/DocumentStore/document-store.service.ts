@@ -10,7 +10,7 @@ export class DocumentStoreService {
     private activeDocumentSubject = new BehaviorSubject<TextDocument | null>(null);
 
     documents$ = this.documentsSubject.asObservable();
-    activeDocument = this.activeDocumentSubject.asObservable();
+    activeDocument$ = this.activeDocumentSubject.asObservable();
 
     getAll(): TextDocument[] {
         return this.documentsSubject.value;
