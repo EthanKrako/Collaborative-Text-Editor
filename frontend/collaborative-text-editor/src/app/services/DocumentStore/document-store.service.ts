@@ -20,9 +20,21 @@ export class DocumentStoreService {
         return this.documentsSubject.value.find(doc => doc.id === id) ?? null;
     }
 
-    create(document: TextDocument): void {
+    create(title: string): string {
         const currentDocs = this.documentsSubject.value;
-        this.documentsSubject.next([...currentDocs, document]);
+        let newId = Math.random().toString(36).substring(2, 9);
+        while (currentDocs.some(doc => doc.id === newId)) {
+            newId = Math.random().toString(36).substring(2, 9);
+        }
+        const newDocument: TextDocument = {
+            id: newId,
+            title: title,
+            content: "",
+            lastModified: new Date()
+        }
+
+        this.documentsSubject.next([...currentDocs, newDocument]);
+        return newId;
     }
 
     updateContent(id: string, newContent: string): void {

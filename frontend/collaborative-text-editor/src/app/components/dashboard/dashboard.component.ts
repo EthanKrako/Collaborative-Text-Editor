@@ -1,6 +1,7 @@
 import { Component, inject } from "@angular/core";
 import { Router } from "@angular/router";
 import { AsyncPipe } from "@angular/common";
+import { TextDocument } from "../../models/document.model";
 import { DocumentStoreService } from "../../services/DocumentStore/document-store.service";
 
 @Component({
@@ -18,5 +19,12 @@ export class Dashboard{
     openDocument(id: string): void {
         this.store.setActive(id);
         this.router.navigate(['/document', id]);
+    }
+
+    createDocument(): void {
+        const newDocumentName = "New Document";
+
+        const newDocumentId = this.store.create(newDocumentName);
+        this.openDocument(newDocumentId);
     }
 }
