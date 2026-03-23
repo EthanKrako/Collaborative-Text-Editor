@@ -38,6 +38,14 @@ export class DocumentService {
         return ydoc;
     }
 
+    async getYjsState(id: string): Promise<Buffer | null> {
+        const doc = await this.documentModel.findOne({ id });
+        if (!doc) { 
+            return null;
+        }
+        return doc.yState;
+    }
+
     async updateDocument(id: string, ydoc: Y.Doc): Promise<void> {
         const state = Y.encodeStateAsUpdate(ydoc);
 
