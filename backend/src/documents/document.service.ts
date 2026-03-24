@@ -38,6 +38,10 @@ export class DocumentService {
         return ydoc;
     }
 
+    async getAllDocuments(): Promise<Omit<DocumentEntity, 'yState'>[]> {
+        return this.documentModel.find().select('id title lastUpdatedAt').lean().exec();
+    }
+
     async getYjsState(id: string): Promise<Buffer | null> {
         const doc = await this.documentModel.findOne({ id });
         if (!doc) { 

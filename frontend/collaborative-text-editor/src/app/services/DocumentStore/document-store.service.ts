@@ -1,6 +1,7 @@
-import { Injectable } from "@angular/core";
-import { BehaviorSubject } from "rxjs";
+import { inject, Injectable } from "@angular/core";
+import { BehaviorSubject, firstValueFrom } from "rxjs";
 import { TextDocument } from "../../models/document.model";
+import { BackendAPIService } from "../BackendAPI/backend-api.service";
 
 @Injectable({
     providedIn: "root"
@@ -9,32 +10,39 @@ export class DocumentStoreService {
     private documentsSubject = new BehaviorSubject<TextDocument[]>([]);
     private activeDocumentSubject = new BehaviorSubject<TextDocument | null>(null);
 
+    private backendAPIService: BackendAPIService = inject(BackendAPIService);
+
     documents$ = this.documentsSubject.asObservable();
     activeDocument$ = this.activeDocumentSubject.asObservable();
 
-    getAll(): TextDocument[] {
-        return this.documentsSubject.value;
+    loadDocuments(): void {
+        this.backendAPIService.getDocuments().subscribe({
+            next: (fetchedDocs) => {
+                this.documentsSubject.next(fetchedDocs);
+            },
+            error: (err) => {
+                console.error('Failed to load documents:', err);
+            }
+        });
     }
 
     getById(id: string): TextDocument | null {
         return this.documentsSubject.value.find(doc => doc.id === id) ?? null;
     }
 
-    create(title: string): string {
-        const currentDocs = this.documentsSubject.value;
-        let newId = Math.random().toString(36).substring(2, 9);
-        while (currentDocs.some(doc => doc.id === newId)) {
-            newId = Math.random().toString(36).substring(2, 9);
+    async create(title: string): Promise<string> {
+        try {
+            const createdDoc = await firstValueFrom(
+                this.backendAPIService.createDocument(title)
+            );
+            const updatedDocs = [...this.documentsSubject.value, createdDoc];
+            this.documentsSubject.next(updatedDocs);
+            this.setActive(createdDoc.id);
+            return createdDoc.id;
+        } catch (error) {
+            console.error('Failed to create document:', error);
+            throw error;
         }
-        const newDocument: TextDocument = {
-            id: newId,
-            title: title,
-            content: "",
-            lastModified: new Date()
-        }
-
-        this.documentsSubject.next([...currentDocs, newDocument]);
-        return newId;
     }
 
     updateContent(id: string, newContent: string): void {

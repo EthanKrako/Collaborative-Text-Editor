@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { AsyncPipe } from "@angular/common";
 import { TextDocument } from "../../models/document.model";
@@ -10,21 +10,25 @@ import { DocumentStoreService } from "../../services/DocumentStore/document-stor
     styleUrl: 'dashboard.component.css',
     imports: [AsyncPipe]
 })
-export class Dashboard{
+export class Dashboard implements OnInit{
     private router = inject(Router);
     private store = inject(DocumentStoreService);
 
     documents$ = this.store.documents$;
+
+    ngOnInit(): void {
+        this.store.loadDocuments();
+    }
 
     openDocument(id: string): void {
         this.store.setActive(id);
         this.router.navigate(['/document', id]);
     }
 
-    createDocument(): void {
+    async createDocument(): Promise<void> {
         const newDocumentName = "New Document";
 
-        const newDocumentId = this.store.create(newDocumentName);
+        const newDocumentId = await this.store.create(newDocumentName);
         this.openDocument(newDocumentId);
     }
 }
