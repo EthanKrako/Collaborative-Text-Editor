@@ -1,18 +1,30 @@
-import { WebSocketGateway, SubscribeMessage, MessageBody, ConnectedSocket } from '@nestjs/websockets';
+import { WebSocketGateway, SubscribeMessage, MessageBody, ConnectedSocket, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { DocumentService } from './document.service';
 import * as Y from 'yjs';
 
 @WebSocketGateway()
-export class DocumentGateway {
-    loadedDocuments: Map<string, Y.Doc> = new Map();
+export class DocumentGateway implements OnGatewayDisconnect {
+    loadedDocuments: Map<string, { doc: Y.Doc, refCount: number, timer: NodeJS.Timeout | null, isDirty: boolean }> = new Map();
 
     constructor(private readonly documentService: DocumentService) {}
-
     @SubscribeMessage('join-document')
     async handleJoinDocument(@ConnectedSocket() client: Socket, @MessageBody() data: { documentId: string }) {
         client.join(`doc-${data.documentId}`);
+
+        let doc: Y.Doc | null = null;
         
+        if (this.loadedDocuments.has(data.documentId)) {
+            doc = this.loadedDocuments.get(data.documentId)?.doc ?? null;
+            this.loadedDocuments.get(data.documentId)!.refCount++;
+        } else {
+            doc = await this.loadDocumentFromDB(data.documentId);
+            if (doc) {
+                this.loadedDocuments.set(data.documentId, { doc, refCount: 1, timer: null, isDirty: false });
+            }
+        }
+
+        if (!doc) { return; }        
 
         const yState = await this.documentService.getYjsState(data.documentId);
         client.emit('initial-state', { state: yState });
@@ -20,22 +32,43 @@ export class DocumentGateway {
 
     @SubscribeMessage('update')
     async handleUpdate(client: Socket, @MessageBody() data: { documentId: string; update: Uint8Array }) {
-        let doc: Y.Doc | null = null;
-        
-        if (this.loadedDocuments.has(data.documentId)) {
-            doc = this.loadedDocuments.get(data.documentId) ?? null;
-        } else {
-            doc = await this.loadDocumentFromDB(data.documentId);
-            if (doc) {
-                this.loadedDocuments.set(data.documentId, doc);
-            }
-        }
+        const entry = this.loadedDocuments.get(data.documentId);
+        if (!entry) return;
 
-        if (!doc) { return; }
+        const doc = entry.doc;
+        if (!doc) return;
         
         Y.applyUpdate(doc, data.update);
-        await this.documentService.updateDocument(data.documentId, doc);
         client.to(`doc-${data.documentId}`).emit('update', { update: data.update });
+        
+        entry.isDirty = true;
+
+        if (entry.timer) {
+            clearTimeout(entry.timer);
+        }
+        entry.timer = setTimeout(async () => {
+            if (entry.isDirty) {
+                await this.documentService.updateDocument(data.documentId, doc);
+                entry.isDirty = false;
+            }
+        }, 5000);
+    }
+
+    async handleDisconnect(client: Socket) {
+        for (const [documentId, entry] of this.loadedDocuments.entries()) {
+            if (client.rooms.has(`doc-${documentId}`)) {
+                entry.refCount--;
+                if (entry.refCount <= 0) {
+                    if (entry.isDirty) {
+                        await this.documentService.updateDocument(documentId, entry.doc);
+                    }
+                    if (entry.timer) {
+                        clearTimeout(entry.timer);
+                    }
+                    this.loadedDocuments.delete(documentId);
+                }
+            }
+        }
     }
 
     private async loadDocumentFromDB(documentId: string): Promise<Y.Doc | null> {
