@@ -17,7 +17,7 @@ export class DocumentService {
 
         const state = Y.encodeStateAsUpdate(ydoc);
 
-        const createdDocument = new this.documentModel({
+        const createdDocument = new this.documentModel({ 
             id: randomUUID(),
             title,
             yState: Buffer.from(state),
@@ -27,15 +27,12 @@ export class DocumentService {
         return createdDocument.save();
     }
 
-    async getDocument(id: string): Promise<Y.Doc | null> {
-        const doc = await this.documentModel.findOne({ id });
-
-        if (!doc) return null;
-
-        const ydoc = new Y.Doc();
-        Y.applyUpdate(ydoc, doc.yState);
-
-        return ydoc;
+    async getDocument(id: string): Promise<DocumentEntity> {
+        const doc = await this.documentModel.findOne({ id }); 
+        if (!doc) {
+            throw new Error(`Document with id ${id} not found`);
+        }
+        return doc;
     }
 
     async getAllDocuments(): Promise<Omit<DocumentEntity, 'yState'>[]> {

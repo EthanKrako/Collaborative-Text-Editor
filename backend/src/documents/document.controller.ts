@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { DocumentService } from "./document.service";
 import { DocumentEntity } from "./schemas/document.schema";
 
@@ -9,6 +9,11 @@ export class DocumentController {
     @Get()
     findAll(): Promise<Omit<DocumentEntity, 'yState'>[]> {
         return this.documentService.getAllDocuments();
+    }
+
+    @Get(':id')
+    async findOne(@Param('id') id: string): Promise<DocumentEntity> {
+        return await this.documentService.getDocument(id);
     }
 
     @Post()

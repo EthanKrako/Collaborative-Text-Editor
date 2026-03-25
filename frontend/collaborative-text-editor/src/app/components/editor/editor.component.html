@@ -1,3 +1,3 @@
 <h1 class="documentTitle">{{documentTitle}}</h1>
 
-<quill-editor [(ngModel)]="editorContent" (ngModelChange)="onContentChanged($event)" name="mainEditor" id="mainEditor"></quill-editor>
+<quill-editor name="mainEditor" id="mainEditor" (onEditorCreated)="onEditorCreated($event)"></quill-editor>

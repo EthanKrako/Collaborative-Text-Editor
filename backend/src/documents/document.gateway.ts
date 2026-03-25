@@ -3,7 +3,13 @@ import { Socket } from 'socket.io';
 import { DocumentService } from './document.service';
 import * as Y from 'yjs';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: 'http://localhost:4200',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+})
 export class DocumentGateway implements OnGatewayDisconnect {
     loadedDocuments: Map<string, { doc: Y.Doc, refCount: number, timer: NodeJS.Timeout | null, isDirty: boolean }> = new Map();
 
@@ -24,14 +30,14 @@ export class DocumentGateway implements OnGatewayDisconnect {
             }
         }
 
-        if (!doc) { return; }        
+        if (!doc) { return; }
 
-        const yState = await this.documentService.getYjsState(data.documentId);
-        client.emit('initial-state', { state: yState });
+        const yState = Y.encodeStateAsUpdate(doc);
+        client.emit('initial-state', { state: Buffer.from(yState) });
     }
 
     @SubscribeMessage('update')
-    async handleUpdate(client: Socket, @MessageBody() data: { documentId: string; update: Uint8Array }) {
+    async handleUpdate(@ConnectedSocket() client: Socket, @MessageBody() data: { documentId: string; update: Uint8Array }) {
         const entry = this.loadedDocuments.get(data.documentId);
         if (!entry) return;
 
@@ -54,7 +60,7 @@ export class DocumentGateway implements OnGatewayDisconnect {
         }, 5000);
     }
 
-    async handleDisconnect(client: Socket) {
+    async handleDisconnect(@ConnectedSocket() client: Socket) {
         for (const [documentId, entry] of this.loadedDocuments.entries()) {
             if (client.rooms.has(`doc-${documentId}`)) {
                 entry.refCount--;
@@ -72,7 +78,11 @@ export class DocumentGateway implements OnGatewayDisconnect {
     }
 
     private async loadDocumentFromDB(documentId: string): Promise<Y.Doc | null> {
-        const ydoc = await this.documentService.getDocument(documentId);
+        const doc = await this.documentService.getDocument(documentId);
+        if (!doc) return null;
+        
+        const ydoc = new Y.Doc();
+        Y.applyUpdate(ydoc, doc.yState);
         return ydoc;
     }
 }

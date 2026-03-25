@@ -15,6 +15,10 @@ export class BackendAPIService {
         return this.http.get<TextDocument[]>(`${this.baseUrl}/documents`);
     }
 
+    getDocumentById(id: string): Observable<TextDocument> {
+        return this.http.get<TextDocument>(`${this.baseUrl}/documents/${id}`);
+    }
+
     createDocument(title: string): Observable<TextDocument> {
         return this.http.post<TextDocument>(`${this.baseUrl}/documents`, { title });
     }

@@ -15,6 +15,19 @@ export class DocumentStoreService {
     documents$ = this.documentsSubject.asObservable();
     activeDocument$ = this.activeDocumentSubject.asObservable();
 
+    setActive(id: string): void {
+        const doc = this.documentsSubject.value.find(d => d.id === id) ?? null;
+        this.activeDocumentSubject.next(doc);
+    }
+
+    getActive(): TextDocument | null {
+        return this.activeDocumentSubject.value;
+    }
+
+    getById(id: string): TextDocument | null {
+        return this.documentsSubject.value.find(doc => doc.id === id) ?? null;
+    }
+
     loadDocuments(): void {
         this.backendAPIService.getDocuments().subscribe({
             next: (fetchedDocs) => {
@@ -24,10 +37,6 @@ export class DocumentStoreService {
                 console.error('Failed to load documents:', err);
             }
         });
-    }
-
-    getById(id: string): TextDocument | null {
-        return this.documentsSubject.value.find(doc => doc.id === id) ?? null;
     }
 
     async create(title: string): Promise<string> {
@@ -53,8 +62,28 @@ export class DocumentStoreService {
         this.documentsSubject.next(updated);
     }
 
-    setActive(id: string): void {
-        const doc = this.documentsSubject.value.find(d => d.id === id) ?? null;
-        this.activeDocumentSubject.next(doc);
+    async ensureActiveDocument(id: string): Promise<void> {
+        // Check if document is already in memory
+        const existing = this.getById(id);
+        if (existing) {
+            this.setActive(id);
+            return;
+        }
+
+        // If not in memory, fetch from backend
+        try {
+            const doc = await firstValueFrom(
+                this.backendAPIService.getDocumentById(id)
+            );
+            if (!doc) {
+                console.warn(`Document with id ${id} not found in backend.`);
+                return;
+            }
+            const updatedDocs = [...this.documentsSubject.value, doc];
+            this.documentsSubject.next(updatedDocs);
+            this.setActive(id);
+        } catch (error) {
+            console.error('Failed to load document:', error);
+        }
     }
 }
