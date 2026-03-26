@@ -1,10 +1,25 @@
-<!-- "| async" automatically subscribe the whole loop to documents$  -->
-@for (document of documents$ | async; track document.id) {      
-    <div class="documentCard">
-        <div class="documentPreview"></div>
-        <div class="documentTitle">{{document.title}}</div>
-        <button class="openButton" (click)="openDocument(document.id)">Open</button>
-    </div>
-}
+<div class="dashboardContainer">
 
-<button class="createDocumentButton" (click)="createDocument()">New Document</button> 
+    <h1>Collaborative Text Editor</h1>
+
+    <div class="documentList">        
+        <!-- "| async" automatically subscribe the whole loop to documents$  -->
+        @for (document of documents$ | async; track document.id) {      
+            <div class="documentCard">
+                <div class="documentTitle">{{document.title}}</div>
+                <button class="openButton" (click)="openDocument(document.id)">Open</button>
+            </div>
+        }
+    </div>
+    
+    <input class="newDocumentCheckbox" type="checkbox" id="checkbox">
+    <div class="newDocumentInputs">
+        <form class="newDocumentForm" (submit)="$event.preventDefault();">
+            <input #titleInput class="titleInput" type="text" placeholder="Document name" />
+            <label class="buttonLabel" for="checkbox">
+                <button class="createDocumentButton" (click)="createDocument(titleInput.value)">Create</button> 
+            </label>
+            <label class="newDocumentToggle" for="checkbox" data-title="New Document"></label>
+        </form>
+    </div>
+</div>

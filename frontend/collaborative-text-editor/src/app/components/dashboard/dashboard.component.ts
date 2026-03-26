@@ -25,10 +25,10 @@ export class Dashboard implements OnInit{
         this.router.navigate(['/document', id]);
     }
 
-    async createDocument(): Promise<void> {
-        const newDocumentName = "New Document";
+    async createDocument(rawTitle: string): Promise<void> {
+        const title = rawTitle.trim() || "New Document";
 
-        const newDocumentId = await this.store.create(newDocumentName);
+        const newDocumentId = await this.store.create(title);
         this.openDocument(newDocumentId);
     }
 }

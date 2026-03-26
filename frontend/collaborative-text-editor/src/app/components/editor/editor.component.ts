@@ -1,19 +1,18 @@
 import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
+import { Subscription } from "rxjs";
+import { DocumentStoreService } from "../../services/DocumentStore/document-store.service";
+import { SocketService } from "../../services/Socket/socket.service";
 import Quill from "quill";
 import { QuillModule } from "ngx-quill";
-import { DocumentStoreService } from "../../services/DocumentStore/document-store.service";
 import * as Y from 'yjs';
-import { SocketService } from "../../services/Socket/socket.service";
-import { Subscription } from "rxjs";
 import { QuillBinding } from "y-quill";
 
 @Component({
     selector: 'app-editor',
     templateUrl: 'editor.component.html',
     styleUrl: 'editor.component.css',
-    imports: [FormsModule, QuillModule]
+    imports: [QuillModule]
 })
 
 export class Editor implements OnInit, OnDestroy {
@@ -21,16 +20,17 @@ export class Editor implements OnInit, OnDestroy {
     documentStoreService = inject(DocumentStoreService);
     socketService = inject(SocketService);
     cdr = inject(ChangeDetectorRef);
-    editor: Quill | null = null;
-    quillYjsBinding: QuillBinding | null = null;
+
     documentTitle: string = 'Title';
     documentId: string = '';
+    editor: Quill | null = null;
+    quillYjsBinding: QuillBinding | null = null;
     ydoc: Y.Doc | null = null;
     ytext: Y.Text | null = null;
-    ydocUpdateHandler: ((update: Uint8Array, origin: unknown) => void) | null = null;
-    private subscriptions: Subscription | null = null;
-    private editorListenersCleanupFunctions: (() => void)[] = [];
 
+    ydocUpdateHandler: ((update: Uint8Array, origin: unknown) => void) | null = null;
+    private subscription: Subscription | null = null;
+    private editorListenersCleanupFunctions: (() => void)[] = [];
 
     async ngOnInit(): Promise<void> {
         this.documentId = this.activatedRoute.snapshot.paramMap.get('id') || '';
@@ -39,7 +39,7 @@ export class Editor implements OnInit, OnDestroy {
             await this.documentStoreService.ensureActiveDocument(this.documentId);
         }
 
-        this.subscriptions = this.documentStoreService.activeDocument$.subscribe(doc => {
+        this.subscription = this.documentStoreService.activeDocument$.subscribe(doc => {
             if (!doc) return;
             this.documentTitle = doc.title;
             this.documentId = doc.id;
@@ -86,8 +86,8 @@ export class Editor implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.teardownEditor();
-        if (this.subscriptions) {
-            this.subscriptions.unsubscribe();
+        if (this.subscription) {
+            this.subscription.unsubscribe();
         }
     }
 
@@ -103,7 +103,6 @@ export class Editor implements OnInit, OnDestroy {
         this.ytext = null;
         this.quillYjsBinding?.destroy();
         this.quillYjsBinding = null;
-        this.editor = null;
     }
 
     private setupBindingIfReady() {

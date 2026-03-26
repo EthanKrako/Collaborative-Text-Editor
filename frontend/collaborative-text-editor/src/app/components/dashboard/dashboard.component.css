@@ -1,0 +1,184 @@
+:host {
+    width: 100%;
+}
+
+.dashboardContainer {
+    height: 100vh;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2vh;
+}
+
+.documentList {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.documentCard {
+    height: 100%;
+    width: 100%;
+    padding: 10px 30px;
+    display: flex;
+    gap: 10px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.documentTitle {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    font-size: clamp(14px, calc(1vw + 5px), 20px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.openButton {
+    background-color: transparent;
+    padding: 5px 20px;
+    border-radius: 15px;
+    cursor: pointer;
+}
+
+
+
+/* New Document Inputs */
+.newDocumentCheckbox {
+  display: none;
+}
+.newDocumentCheckbox:checked + .newDocumentInputs .newDocumentForm {
+  width: 37.5em;
+}
+.newDocumentCheckbox:checked + .newDocumentInputs .newDocumentToggle {
+  visibility: hidden;
+  opacity: 0;
+  transform: scale(0.7);
+}
+.newDocumentCheckbox:checked + .newDocumentInputs .titleInput,
+.newDocumentCheckbox:checked + .newDocumentInputs .buttonLabel {
+  transition: 0.2s 0.1s;
+  visibility: visible;
+  opacity: 1;
+  transform: scale(1);
+}
+.newDocumentCheckbox:not(:checked) + .newDocumentInputs .titleInput:required:valid ~ .newDocumentToggle::before, .newDocumentCheckbox:checked + .newDocumentInputs .titleInput:required:valid ~ .newDocumentToggle::before {
+  content: "Loading...";
+}
+.newDocumentCheckbox:not(:checked) + .newDocumentInputs .titleInput:required:valid ~ .newDocumentToggle {
+  pointer-events: none;
+  cursor: default;
+}
+
+.newDocumentInputs,
+.newDocumentForm,
+.newDocumentToggle {
+  width: 20em;
+  height: 3rem;
+}
+
+.newDocumentInputs {
+  position: relative;
+}
+
+.newDocumentForm,
+.newDocumentToggle {
+  position: absolute;
+  border-radius: 6.25em;
+  color: gray; 
+  background-color: #ffffff;
+  transition: 0.2s;
+}
+
+.newDocumentForm {
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.625em;
+  box-sizing: border-box;
+  box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+}
+
+.newDocumentToggle {
+  top: 0;
+  cursor: pointer;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.newDocumentToggle::before {
+  content: attr(data-title);
+}
+
+.titleInput,
+.createDocumentButton {
+  font: inherit;
+  border: 0;
+  outline: 0;
+  border-radius: 5em;
+  box-sizing: border-box;
+}
+
+.titleInput,
+.buttonLabel {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.7);
+  transition: 0s;
+}
+
+.titleInput {
+  color: gray;
+  height: 100%;
+  width: 100%;
+  padding: 0 0.714em;
+}
+.titleInput::placeholder {
+  color: currentColor;
+}
+.titleInput:required:valid {
+  color: black;
+}
+.titleInput:required:valid + .buttonLabel {
+  color: #ffffff;
+}
+.titleInput:required:valid + .buttonLabel::before {
+  pointer-events: initial;
+}
+
+.buttonLabel {
+  color: white;
+  height: 100%;
+  width: auto;
+}
+.buttonLabel::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  cursor: pointer;
+}
+
+.createDocumentButton {
+  color: inherit;
+  padding: 0;
+  height: 100%;
+  width: 5em;
+  background-color: darkgray;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.createDocumentButton:hover {
+  background-color: gray;
+}
