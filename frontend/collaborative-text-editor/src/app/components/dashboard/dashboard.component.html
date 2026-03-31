@@ -4,10 +4,13 @@
 
     <div class="documentList">        
         <!-- "| async" automatically subscribe the whole loop to documents$  -->
-        @for (document of documents$ | async; track document.id) {      
-            <div class="documentCard">
-                <div class="documentTitle">{{document.title}}</div>
-                <button class="openButton" (click)="openDocument(document.id)">Open</button>
+        @for (document of documents$ | async; track document.id) {
+            <div class="documentLine">
+                <div class="documentCard">
+                    <div class="documentTitle">{{document.title}}</div>
+                    <button class="openButton" (click)="openDocument(document.id)">Open</button>
+                </div>
+                <button class="deleteButton" (click)="deleteDocument(document.id)">X</button>
             </div>
         }
     </div>

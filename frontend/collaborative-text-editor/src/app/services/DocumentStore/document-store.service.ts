@@ -54,6 +54,21 @@ export class DocumentStoreService {
         }
     }
 
+    async delete(id: string): Promise<void> {
+        try {
+            await firstValueFrom(
+                this.backendAPIService.deleteDocument(id)
+            );
+            const updatedDocs = this.documentsSubject.value.filter((document) => {
+                return document.id !== id;
+            });
+            this.documentsSubject.next(updatedDocs);
+        } catch (error) {
+            console.error('Failed to delete document:', error);
+            throw error;
+        }
+    }
+
     updateContent(id: string, newContent: string): void {
         const current = this.documentsSubject.value;
         const updated = current.map(doc =>

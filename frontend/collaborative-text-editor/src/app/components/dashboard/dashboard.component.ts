@@ -25,6 +25,10 @@ export class Dashboard implements OnInit{
         this.router.navigate(['/document', id]);
     }
 
+    deleteDocument(id: string): void {
+        this.store.delete(id);
+    }
+
     async createDocument(rawTitle: string): Promise<void> {
         const title = rawTitle.trim() || "New Document";
 

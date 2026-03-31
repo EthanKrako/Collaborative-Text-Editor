@@ -22,4 +22,8 @@ export class BackendAPIService {
     createDocument(title: string): Observable<TextDocument> {
         return this.http.post<TextDocument>(`${this.baseUrl}/documents`, { title });
     }
+
+    deleteDocument(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/documents/${id}`);
+    }
 }
