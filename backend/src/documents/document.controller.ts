@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post } from "@nestjs/common";
 import { DocumentService } from "./document.service";
 import { DocumentEntity } from "./schemas/document.schema";
 
@@ -19,5 +19,10 @@ export class DocumentController {
     @Post()
     async create(@Body() body: { title: string }): Promise<DocumentEntity> {
         return this.documentService.createDocument(body.title);
+    }
+
+    @Delete(':id')
+    async delete(@Param('id') id: string): Promise<void> {
+        await this.documentService.deleteDocument(id);
     }
 }

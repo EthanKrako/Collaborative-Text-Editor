@@ -5,7 +5,7 @@ export type DocumentDocument = DocumentEntity & Document;
 
 @Schema()
 export class DocumentEntity {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   id: string;
 
   @Prop({ required: true })
