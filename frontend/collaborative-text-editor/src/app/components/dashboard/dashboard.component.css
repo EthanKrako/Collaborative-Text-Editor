@@ -200,3 +200,15 @@
 .createDocumentButton:hover {
     background-color: gray;
 }
+
+@media (max-width: 650px) {
+    .newDocumentCheckbox:checked + .newDocumentInputs .newDocumentForm {
+        width: 20em;
+    }
+}
+
+@media (max-width: 480px) {
+    .deleteButton {
+        display: none;
+    }
+}
