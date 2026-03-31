@@ -92,7 +92,7 @@
 .newDocumentToggle {
   position: absolute;
   border-radius: 6.25em;
-  color: gray; 
+  color: black; 
   background-color: #ffffff;
   transition: 0.2s;
 }
@@ -137,7 +137,7 @@
 }
 
 .titleInput {
-  color: gray;
+  color: black;
   height: 100%;
   width: 100%;
   padding: 0 0.714em;
@@ -174,7 +174,7 @@
   padding: 0;
   height: 100%;
   width: 5em;
-  background-color: darkgray;
+  background-color: black;
   transition: background-color 0.2s;
   cursor: pointer;
 }
