@@ -40,6 +40,6 @@ This is a personal learning project, not production-ready:
 
 ❌ No authentication — all users share the same documents  
 ❌ No access control — anyone can delete any document  
-❌ Database stores Yjs updates instead of storing the document text, which can take up a lot of memory really fast
+❌ Database stores Yjs updates instead of storing the document text, which can take up a lot of memory really fast  
 ❌ Minimal UI design  
 ❌ No version history  
